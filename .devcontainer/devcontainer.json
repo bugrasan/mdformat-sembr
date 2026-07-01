@@ -1,0 +1,320 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+	// "name": "Node.js & TypeScript",
+	"name": "custom build - mdformat-sembr",
+	// list of images: https://github.com/devcontainers/images/tree/main/src
+
+	// https://github.com/devcontainers/images/tree/main/src/python
+	// "image": "mcr.microsoft.com/devcontainers/python:3.13",
+
+	// https://github.com/devcontainers/images/tree/main/src/typescript-node
+	// "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+
+	// https://github.com/devcontainers/images/tree/main/src/base-debian
+	// Debian: 9-stretch (2017), 10-buster (2019), 11-bullseye (2021), 12-bookworm (2023), 13-trixie (2025), 14-forky (tbd)
+	"image": "mcr.microsoft.com/devcontainers/base:trixie",					// bookworm, trixie
+	// "image": "mcr.microsoft.com/devcontainers/base:debian",
+
+	// https://github.com/devcontainers/images/tree/main/src/base-ubuntu
+	// "image": "mcr.microsoft.com/devcontainers/base:ubuntu",				// comes with node:v18, python:v3.12
+	// "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.05",		// available only LTEs e.g. 24.05, 22.04
+
+	// **IMPORTANT**: not from microsoft, as such no 'vscode' user added
+	// "image": "quay.io/toolbx/arch-toolbox:latest",
+
+	// either image or self-build docker image
+	// "build": {
+	// 	"dockerfile": "Dockerfile.trixie"
+	// },
+
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+	"features": {
+		// https://github.com/devcontainers/features/blob/main/src/common-utils/
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			// "installZsh": false, // already part of devcontainer 'base' image
+			"username": "vscode"
+		},
+		// https://github.com/devcontainers/features/tree/main/src/desktop-lite
+		// "ghcr.io/devcontainers/features/desktop-lite:1": {
+		// 	// default password 'vscode'
+		// 	// "password": "vscode",
+		// 	// Enter a port for the desktop VNC server (TigerVNC)
+		// 	// "vncPort": 5901,
+		// 	// Enter a port for the VNC web client (noVNC)
+		// 	// "webPort": 6080,
+		// },
+		// https://github.com/devcontainers/features/blob/main/src/node/
+    		// "ghcr.io/devcontainers/features/node:1": {
+		// 	// min required version for github-copilot as of Nov'25
+		// 	"version": "22"
+		// },
+		// https://github.com/devcontainers/features/blob/main/src/python/
+		"ghcr.io/devcontainers/features/python:1": {
+		// 	// debian:trixie comes with 3.13, however due to this bug
+		// 	// we still need to provide the version if we want to install jupyterlab
+		// 	// https://github.com/devcontainers/features/issues/1403
+			"version": "os-provided",
+		// 	"version": "3.13",
+		// 	"installJupyterlab": "true"
+		},
+		// https://github.com/devcontainers/features/blob/main/src/github-cli/
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		// https://github.com/devcontainers/features/blob/main/src/copilot-cli/
+		"ghcr.io/devcontainers/features/copilot-cli:1": {},
+		// https://github.com/devcontainers/features/tree/main/src/azure-cli
+		// **IMPORTANT**: disable telemetry with `az config set core.collect_telemetry=false`
+		// 	"ghcr.io/devcontainers/features/azure-cli:1": {},
+		// https://github.com/devcontainers/features/tree/main/src/aws-cli
+		// "ghcr.io/devcontainers/features/aws-cli:1": {},
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// **VNC for web**
+	// "forwardPorts": [6080],
+	// "portsAttributes": {
+	// 	"6080": {
+	// 		"label": "desktop"
+	// 	}
+	// }
+	// **VNC for TigerVNC
+	// "forwardPorts": [5901],
+	// "appPort": 5901,
+	// "portsAttributes": {
+	// 	"5901": {
+	// 		"label": "VNC desktop",
+	// 	}
+	// },
+
+	// Runs on the HOST before the container starts — ensures the .worktrees sibling folder exists.
+	// initializeCommand runs on the HOST before the container starts.
+	// Must be a string (not array) so it runs through /bin/sh -c.
+	"initializeCommand": {
+		// Git worktrees: VS Code creates <project>.worktrees/ next to the workspace folder.
+		// Inside the container /workspaces/ is not writable by the vscode user, so we bind-mount
+		// the folder from the host to avoid permission errors.
+		"worktrees": "mkdir -p \"${localWorkspaceFolder}.worktrees\"",
+		// **IMPORTANT** deletes the named docker volume; usually mounted as ~/
+		// uncomment for a single rebuild then comment it out again
+		//"wipeVolume": "docker volume rm -f DevContVol-${devcontainerId} 2>/dev/null || true",
+		// Timezone - align to local timezone
+		// "TZ": "TZ_VAL=$(readlink /etc/localtime | sed 's|.*/zoneinfo/||') && (grep -q '^TZ=' .devcontainer/.env && sed -i '' \"s|^TZ=.*|TZ=$TZ_VAL|\" .devcontainer/.env || echo \"TZ=$TZ_VAL\" >> .devcontainer/.env)",
+	},
+
+	"mounts": [
+		// FIXME
+		// !!! There is some permission issue:
+		// cannot create directory '/home/vscode/.vscode-server/bin': Permission denied
+		// see also for workaround: https://github.com/microsoft/vscode-remote-release/issues/7690#issuecomment-2761197753
+		// https://code.visualstudio.com/docs/devcontainers/tips-and-tricks
+		// It creates named volume called profile mounted to /root, which will survive a rebuild.
+		// It next creates an anonymous volume mounted to /root/.vscode-server that gets destroyed on rebuild,
+		//   which allows VS Code to reinstall extensions and dotfiles.
+		// !!! Make sure to adjust the target path if you are not using the 'vscode' user
+		// !!! see also "remoteUser" setting below
+		// "source=profile,target=/home/vscode,type=volume",
+		// "target=/home/vscode/.vscode-server,type=volume",
+
+		// ${localEnv:HOME} on Linux/macOS
+		// ${localEnv:USERPROFILE} on Windows
+		// "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,readonly,consistency=cached",
+		// "source=${localEnv:HOME}/.gitignore,target=/home/vscode/.gitignore,type=bind,readonly,consistency=cached",
+
+		// Git worktrees: VS Code creates <project>.worktrees/ next to the workspace folder.
+		"source=${localWorkspaceFolder}.worktrees,target=${containerWorkspaceFolder}.worktrees,type=bind,consistency=cached",
+
+		// **IMPORTANT**:
+		// to enabled named volumes that survive container recreation, we moved to Dockerfile;
+		// to use copy permission on first mount of the named volumes, since they are always created with root permissions
+		// "source=DevContVol-${devcontainerId},target=/home/vscode,type=volume",
+
+		// **IMPORTANT**: keepassxc creates a new file on write and replaces the old one - this is a global setting for keepassxc
+		// this can be adjusted with writing directly to the existing file, but it is flagged as "dangerous"
+		// alternative to share a folder instead of a single file
+		// TODO: create feature request to make this database specific option
+		// "source=${localEnv:HOME}/code/devcont.kdbx,target=/home/vscode/devcont.kdbx,type=bind,readonly,consistency=cached",
+
+		// !!! SSH keys are sensitive, so they should be read-only and cached for better performance
+		// "source=${localEnv:HOME}/.ssh/id_ed25519,target=/home/vscode/.ssh/id_ed25519,type=bind,readonly,consistency=cached",
+		// "source=${localEnv:HOME}/.ssh/id_ed25519.pub,target=/home/vscode/.ssh/id_ed25519.pub,type=bind,readonly,consistency=cached",
+
+		// Claude Code CLI needs to write to these files, so they cannot be read-only
+		// "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+		// "source=${localEnv:HOME}/.claude.json,target=/home/vscode/.claude.json,type=bind,consistency=cached",
+	],
+
+
+	// set env vars for inside the container
+	"containerEnv": {
+		// FIXME: use initializeCommand to write to .devcontainer/.env and use runArgs;
+		// but it is way too complicated, for now this is good enough
+		// timezone fix of colima docker on macos
+		"TZ": "Europe/Zurich",
+		// setting the default visual text editor
+		"EDITOR": "vim",
+		"VISUAL": "code",
+
+		// github-cli
+		// https://cli.github.com/telemetry
+		"GH_TELEMETRY": "false",
+		"DO_NOT_TRACK": "true",
+
+		// claude-code disable telemetry
+		// https://code.claude.com/docs/en/data-usage
+		// "DISABLE_TELEMETRY": "1",
+		// "DISABLE_ERROR_REPORTING": "1",
+		// "DISABLE_BUG_COMMAND": "1",
+		// "CLAUDE_CONFIG_DIR": "/home/vscode/.claude",
+		// "CLAUDE_CONFIG_FILE": "/home/vscode/.claude.json",
+		// Authentication token => or use .env file and "remoteEnv" setting below
+		// Token can be generated with `claude setup-token`
+		// "CLAUDE_CODE_OAUTH_TOKEN": "",
+		// "ANTHROPIC_AUTH_TOKEN": "",
+
+		// codex: no opt-out telemetry
+		// gh-copilot: no opt-out telemetry
+	},
+	// copy from host env when container starts
+	"remoteEnv": {
+		// "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}",
+		// or use VS Code settings
+		// "OPENAI_API_KEY": "${env:OPENAI_API_KEY}"
+
+		// revoke unwanted ssh-forwarding: see https://github.com/microsoft/vscode-remote-release/issues/11014
+		"SSH_AUTH_SOCK": "",
+	},
+
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// **NOTE**: that these command are executed in parallel, assure they aren't
+	//   dependent to each other
+	"postCreateCommand": {
+		// Remember!!  they are executed in parallel
+		// Debian
+		"basic-dpkgs": "sudo apt update && sudo apt install -y --no-install-recommends vim vim-scripts vim-doc shellcheck eza bat fd-find ripgrep fzf git-delta xh lazygit just jq gnupg2 pass keepassxc ffmpeg fastfetch && sudo apt clean && echo '01-basic-dpkg' >> ~/devcontainer-post-create.txt",
+		// Ubuntu
+		//"basic-dpkgs": "sudo apt update && sudo apt install -y --no-install-recommends vim vim-scripts vim-doc shellcheck eza batcat fd-find ripgrep fzf jq gnupg2 pass keepassxc && sudo apt clean && echo '01-basic-dpkg' >> ~/devcontainer-post-create.txt",
+
+		// editorconfig is required by the vscode extension
+		// mermaid to save as picture
+		// "npm-lint": "npm install -g editorconfig eslint typescript && echo '02-npm-lint' >> ~/devcontainer-post-create.txt",
+
+		// anthropic claude code cli
+		// https://code.claude.com/docs/en/overview
+		// bash is the recommended way as of Nov'25
+		// "claude-code-npm": "npm install -g @anthropic-ai/claude-code && echo '04-claude-code-npm' >> ~/devcontainer-post-create.txt",
+		//"claude-code-binary": "curl -fsSL https://claude.ai/install.sh | bash && echo '04-claude-code-binary' >> ~/devcontainer-post-create.txt",
+
+		// openai codex cli
+		// https://github.com/openai/codex
+		//"codex": "npm install -g @openai/codex && echo '05-codex' >> ~/devcontainer-post-create.txt",
+
+		// BMAD - Bayesian Model for Adaptive Design
+		// Requires interactive shell
+		//"bmad": "npx bmad-method@alpha install && echo 'doneX' >> ~/devcontainer-post-create.txt",
+
+		// "python-notebook": "pip install notebook",
+		//"python-anthropic": "pip install anthropic && echo '06-python-anthropic' >> ~/devcontainer-post-create.txt",
+		//"python-openai": "pip install openai && echo '07-python-openai' >> ~/devcontainer-post-create.txt",
+
+		//"langchain": "pip install langchain langchain-openai langchain-anthropic langgraph-cli[inmem] && echo '08-langchain' >> ~/devcontainer-post-create.txt",
+
+		"uv": "curl -LsSf https://astral.sh/uv/install.sh | sh && echo '09-uv' >> ~/devcontainer-post-create.txt",
+
+		// git based - codeberg can be replaced w/ gitlab.com or github.com
+		//"chezmoi": "sh -c \"$(curl -fsLS get.chezmoi.io/lb)\" -- init --apply git@codeberg.org:bugrasan/dotfiles.git && echo '10-chezmoi' >> ~/devcontainer-post-create.txt",
+		// http based - codeberg can be replaced w/ gitlab.com or github.com
+		"chezmoi": "sh -c \"$(curl -fsLS get.chezmoi.io/lb)\" -- init --one-shot --apply codeberg.org/bugrasan/dotfiles && echo '10-chezmoi' >> ~/devcontainer-post-create.txt",
+
+		// see https://github.com/microsoft/vscode-remote-release/issues/11014
+		"revoke-ssh-forwarding": "find /tmp -maxdepth 1 -name 'vscode-ssh-auth-*.sock' -delete 2>/dev/null || true && echo '11-revoke-ssh-forwarding' >> ~/devcontainer-post-create.txt",
+
+		// simplifies claude; debian and ubuntu don't have duckdb in their repos, so we need to install it manually
+		// "duckdb": "curl https://install.duckdb.org | sh && echo '12-duckdb' >> ~/devcontainer-post-create.txt",
+
+		// disable github telemetry
+		"github-cli-telemetry": "gh config set telemetry disabled || echo '13-github-cli-telemetry' >> ~/devcontainer-post-create.txt",
+	},
+	// "yarn install",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"settings": {
+				// inline instructions for github copilot chat
+				// https://code.visualstudio.com/docs/devcontainers/tips-and-tricks
+
+				// "editor.formatOnSave": true,
+				"terminal.integrated.shell.linux": "/bin/bash",
+				"telemetry.telemetryLevel": "off",
+
+				// Keep speech extensions on the local UI side; avoid loading them in remote container host.
+				"remote.extensionKind": {
+					"ms-vscode.vscode-speech": "ui",
+				},
+
+				// https://code.visualstudio.com/docs/copilot/customization/custom-instructions#_use-a-githubcopilotinstructionsmd-file
+   				"github.copilot.chat.codeGeneration.useInstructionFiles": true,
+				// https://code.visualstudio.com/docs/copilot/customization/custom-instructions#_use-an-agentsmd-file
+				"chat.useAgentsMdFile": true,
+				"chat.useAgentSkills": true,
+				"chat.useNestedAgentsMdFiles": true,
+				// https://code.visualstudio.com/docs/copilot/customization/mcp-servers#_add-an-mcp-server-from-the-github-mcp-server-registry
+				"chat.mcp.gallery.enabled": true,
+
+				// terminal tool auto approve settings
+				// https://code.visualstudio.com/docs/copilot/chat/chat-tools#_autoapprove-all-tools
+				// "chat.tools.terminal.enableAutoApprove": true,
+				// "chat.tools.global.autoApprove": false,
+			},
+			"extensions": [
+				// basic extensions
+				"EditorConfig.EditorConfig",
+				"albert.TabOut",
+				// git extensions
+				"mhutchie.git-graph",
+				"eamodio.gitlens",
+
+				// installed by the node feature above
+				// "dbaeumer.vscode-eslint",
+				// installed by the python feature above
+				// "ms-python.python",
+				// "ms-python.vscode-pylance",
+				// "ms-python.autopep8",
+
+				// jupyter support - installed by python feature above
+				//"ms-toolsai.jupyter",
+				// ms-toolsai.jupyter-keymap will be auto installed as dependency
+				// but will run on local host only, not in container
+
+				// AI extensions
+				// "anthropic.claude-code",
+
+				// vscode recommended extensions for devcontainers
+				"mutantdino.resourcemonitor",
+			],
+		},
+	},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// !!! if not set to then adjust mounts above accordingly
+	// !!! see also "mounts" setting above
+	"containerUser": "vscode",
+	"remoteUser": "vscode",
+
+	// Mount local .env file into the container
+	"runArgs": [
+		// .env file
+		// "--env-file", ".env",
+		// privileged access e.g. USB devices
+		// "--privileged",
+		// let the container auto-destroy after it's closed
+		// https://github.com/microsoft/vscode-remote-release/issues/3512#issuecomment-1018286415
+		"--rm",
+		// vnc for desktop-lite feature
+		// "--shm-size=1g",
+	]
+}

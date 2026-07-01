@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mdformat-sembr"
+version = "0.1.0"
+description = "mdformat plugin that inserts Semantic Line Breaks (sembr.org) as CommonMark soft breaks"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+keywords = ["mdformat", "markdown", "sembr", "semantic line breaks", "formatter"]
+authors = [ "bugrasan" ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = ["mdformat>=1.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://codeberg.org/bugrasan/mdformat-sembr"
+"GitHub Mirror" = "https://github.com/bugrasan/mdformat-sembr"
+
+[project.entry-points."mdformat.parser_extension"]
+sembr = "mdformat_sembr:_plugin"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mdformat_sembr"]
