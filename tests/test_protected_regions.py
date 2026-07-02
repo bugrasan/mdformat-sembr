@@ -19,10 +19,22 @@ def test_inline_code_not_split() -> None:
     assert "`a. b. c()`" in out
 
 
+def test_multi_backtick_code_not_split() -> None:
+    text = "Call ``a. b. c()`` now and then continue with more prose here."
+    out = insert_breaks(text)
+    assert "``a. b. c()``" in out
+
+
 def test_link_not_split() -> None:
     text = "Read [the A. B. guide](https://example.com/a.b.c) before you begin."
     out = insert_breaks(text)
     assert "[the A. B. guide](https://example.com/a.b.c)" in out
+
+
+def test_image_link_not_split() -> None:
+    text = "See ![fig. 1](https://example.com/fig.1.png) for the full diagram here."
+    out = insert_breaks(text)
+    assert "![fig. 1](https://example.com/fig.1.png)" in out
 
 
 def test_footnote_reference_stays_attached() -> None:

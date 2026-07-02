@@ -66,6 +66,7 @@ def _postprocess_paragraph(
     abbreviations = opts.get("abbreviations", None)
     break_clauses = bool(opts.get("break_clauses", False))
     clause_chars = opts.get("clause_chars", DEFAULT_CLAUSE_CHARS)
+    closing_punct = bool(opts.get("closing_punct", False))
 
     return insert_breaks(
         text,
@@ -73,6 +74,7 @@ def _postprocess_paragraph(
         abbreviations=abbreviations,
         break_clauses=break_clauses,
         clause_chars=clause_chars,
+        closing_punct=closing_punct,
     )
 
 
@@ -122,6 +124,17 @@ def add_cli_argument_group(group: argparse._ArgumentGroup) -> None:
             f"(default: {DEFAULT_CLAUSE_CHARS!r})"
         ),
     )
+    group.add_argument(
+        "--sembr-closing-punct",
+        dest="closing_punct",
+        action="store_true",
+        default=None,
+        help=(
+            "handle closing punctuation (quotes, brackets) after sentence "
+            "terminators, keeping them on the preceding line — intended for "
+            "American-English punctuation style (off by default)"
+        ),
+    )
 
 
 #: A mapping from ``RenderTreeNode.type`` to a ``Render`` function. Empty: we do
@@ -139,4 +152,6 @@ __all__ = [
     "update_mdit",
     "add_cli_argument_group",
     "DEFAULT_ABBREVIATIONS",
+    "DEFAULT_CLAUSE_CHARS",
+    "DEFAULT_MIN_CHARS",
 ]

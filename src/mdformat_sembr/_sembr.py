@@ -14,6 +14,13 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable
 
+__all__ = [
+    "DEFAULT_MIN_CHARS",
+    "DEFAULT_CLAUSE_CHARS",
+    "DEFAULT_ABBREVIATIONS",
+    "insert_breaks",
+]
+
 # ---------------------------------------------------------------------------
 # Defaults (ported from the original markdown-format.py hook script)
 # ---------------------------------------------------------------------------
@@ -40,10 +47,17 @@ DEFAULT_ABBREVIATIONS: frozenset[str] = frozenset(
 # Regexes
 # ---------------------------------------------------------------------------
 
-# Sentence-terminator (. ! ?) — including "?!"/"!?" runs — followed by an
-# optional closing quote/bracket, whitespace, and a likely sentence start.
-# The negative lookbehind avoids breaking inside an ellipsis ("...").
+# Sentence-terminator (. ! ?) — including "?!"/"!?" runs — followed by
+# whitespace and a likely sentence start. The negative lookbehind avoids
+# breaking inside an ellipsis ("...").
 _SENTENCE_BOUNDARY = re.compile(
+    r'(?<=[.!?])(?<!\.\.\.)\s+(?=["\'(\[`*_]?[A-Z0-9])'
+)
+
+# Extended variant that also consumes an optional closing quote or bracket
+# immediately after the terminator (American-English punctuation style, e.g.
+# `"goodbye."` or `[sic.]`). Only used when ``closing_punct=True``.
+_SENTENCE_BOUNDARY_CLOSING = re.compile(
     r'(?<=[.!?])(?<!\.\.\.)["\')\]]?\s+(?=["\'(\[`*_]?[A-Z0-9])'
 )
 
@@ -137,17 +151,34 @@ def _collapse_whitespace(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _split_points(masked: str, abbreviations: frozenset[str]) -> list[int]:
+def _split_points(
+    masked: str,
+    abbreviations: frozenset[str],
+    closing_punct: bool = False,
+) -> list[int]:
     """Return sorted cut indices for sentence boundaries in ``masked`` text.
 
-    Each index is the position *after* which a break should be inserted (i.e.
-    the start of the whitespace run following a sentence terminator).
+    Each index is the position of the whitespace run following a sentence
+    terminator.  When ``closing_punct`` is True the extended regex is used,
+    which also matches an optional closing quote or bracket before the
+    whitespace (American-English punctuation style); the cut is then advanced
+    past that closing character so it stays on the preceding line.
     """
+    pattern = _SENTENCE_BOUNDARY_CLOSING if closing_punct else _SENTENCE_BOUNDARY
     points: list[int] = []
-    for m in _SENTENCE_BOUNDARY.finditer(masked):
+    for m in pattern.finditer(masked):
         if _is_abbreviation_before(masked, m.start(), abbreviations):
             continue
-        points.append(m.start())
+        if closing_punct:
+            # Advance past any non-whitespace prefix (the closing char) so the
+            # cut lands on the first whitespace character.
+            prefix = m.group(0)
+            ws_offset = 0
+            while ws_offset < len(prefix) and not prefix[ws_offset].isspace():
+                ws_offset += 1
+            points.append(m.start() + ws_offset)
+        else:
+            points.append(m.start())
     return points
 
 
@@ -197,6 +228,7 @@ def insert_breaks(
     abbreviations: Iterable[str] | None = None,
     break_clauses: bool = False,
     clause_chars: str = DEFAULT_CLAUSE_CHARS,
+    closing_punct: bool = False,
 ) -> str:
     """Insert SemBr soft breaks into a single rendered paragraph string.
 
@@ -220,7 +252,7 @@ def insert_breaks(
 
     masked, store = _mask(collapsed)
 
-    cut_points = _split_points(masked, abbrev)
+    cut_points = _split_points(masked, abbrev, closing_punct)
     if break_clauses:
         cut_points += _clause_split_points(masked, clause_chars)
 

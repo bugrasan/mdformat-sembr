@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mdformat-sembr"
-version = "0.1.0"
+version = "0.2.0"
 description = "mdformat plugin that inserts Semantic Line Breaks (sembr.org) as CommonMark soft breaks"
 readme = "README.md"
 license = "MIT"
@@ -36,3 +36,7 @@ sembr = "mdformat_sembr:_plugin"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mdformat_sembr"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

@@ -54,6 +54,25 @@ def test_cli_break_clauses_flag() -> None:
     assert result.stdout == "One long segment here,\nanother long segment there.\n"
 
 
+def test_cli_clause_chars_option() -> None:
+    # Override clause chars to only include semicolon; comma should NOT break.
+    result = subprocess.run(
+        [
+            sys.executable, "-m", "mdformat", "-",
+            "--sembr-break-clauses",
+            "--sembr-clause-chars", ";",
+            "--sembr-min-chars", "5",
+        ],
+        input="One long segment here, another long segment there; and one more.\n",
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    # Comma must NOT trigger a break; semicolon must.
+    assert ",\n" not in result.stdout
+    assert "there;\n" in result.stdout
+
+
 def test_toml_config(tmp_path) -> None:
     cfg = tmp_path / ".mdformat.toml"
     cfg.write_text("[plugin.sembr]\nmin_chars = 5\n", encoding="utf-8")
