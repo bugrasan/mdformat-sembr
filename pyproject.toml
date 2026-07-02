@@ -11,7 +11,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 keywords = ["mdformat", "markdown", "sembr", "semantic line breaks", "formatter"]
-authors = [ "bugrasan" ]
+authors = [ { name = "bugrasan" } ]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
