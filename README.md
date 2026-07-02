@@ -1,5 +1,10 @@
 # mdformat-sembr
 
+> **Canonical home:** [codeberg.org/adel/mdformat-sembr](https://codeberg.org/adel/mdformat-sembr) — issues and contributions tracked there.
+> The [GitHub mirror](https://github.com/adel/mdformat-sembr) exists solely to enable PyPI Trusted Publishing and provenance attestation.
+
+> **⚠️ Disclaimer**: This project was built using **vibe-/agentic-coding**
+
 An [mdformat](https://mdformat.readthedocs.io) parser-extension plugin that inserts
 [Semantic Line Breaks](https://sembr.org) (SemBr) as CommonMark **soft breaks**.
 
