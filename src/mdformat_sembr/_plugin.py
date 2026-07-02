@@ -51,6 +51,15 @@ def _postprocess_paragraph(
     context: "RenderContext",
 ) -> str:
     """Insert SemBr soft breaks into an already-rendered paragraph string."""
+    # When no GFM table plugin is active, markdown-it parses tables as
+    # paragraphs. Detect that case (multiple lines where at least one starts
+    # with '|') and return the text unchanged so the table structure is
+    # preserved. With a table plugin the node type is 'table', not 'paragraph',
+    # so this guard is never reached for properly-parsed tables.
+    lines = text.splitlines()
+    if len(lines) > 1 and any(line.lstrip().startswith("|") for line in lines):
+        return text
+
     opts = _plugin_options(context)
 
     min_chars = opts.get("min_chars", DEFAULT_MIN_CHARS)
